@@ -14,8 +14,11 @@ cookies*.txt
 # Temporary extraction output
 tmp/
 logs/
+materials/
+material-library/
 *.log
 *.tmp
+*.jsonl
 
 # Large media downloads should not be committed
 *.mp4
@@ -35,4 +38,3 @@ __pycache__/
 node_modules/
 .venv/
 venv/
-

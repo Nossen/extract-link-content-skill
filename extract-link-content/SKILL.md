@@ -1,6 +1,6 @@
 ---
 name: extract-link-content
-description: Extract readable content from user-provided platform links, especially YouTube, Bilibili/B站, Xiaohongshu/小红书, X/Twitter, Reddit, Douyin/抖音, and generic web URLs. Use when the user asks to read, crawl, fetch, extract, summarize from source, get captions/transcripts, inspect a post, or capture video/article/image-post content from one or more links.
+description: Extract readable content from user-provided platform links, especially YouTube, Bilibili/B站, Xiaohongshu/小红书, X/Twitter, Reddit, Douyin/抖音, and generic web URLs. Use when the user asks to read, crawl, fetch, extract, summarize from source, get captions/transcripts, inspect a post, capture video/article/image-post content, collect account素材, save material candidates, score/dedupe素材, or build a local material library from one or more links.
 ---
 
 # Extract Link Content
@@ -55,7 +55,8 @@ For user-owned internal systems or approved staging environments, use explicit t
 2. Check installed upstream tools and any stored authorized session for that platform.
 3. Choose the platform command from [platform-routing.md](references/platform-routing.md).
 4. Store temporary downloads, captions, screenshots, and parsed output in `/tmp/`, not in the user's workspace.
-5. Return a compact extraction report with:
+5. If the user's goal is素材收集、选题库、账号内容参考、批量找素材、入库、评分, or去重, read [material-workflow.md](references/material-workflow.md) and use `scripts/material_intake.py`.
+6. Return a compact extraction report with:
    - `source_url`
    - `platform`
    - `tool_used`
@@ -66,6 +67,7 @@ For user-owned internal systems or approved staging environments, use explicit t
    - `blockers`
    - `next_legitimate_unlock_step`
    - `confidence`
+   - `material_card` when ingested into a material library
 
 ## Routing Rules
 
@@ -74,6 +76,7 @@ For user-owned internal systems or approved staging environments, use explicit t
 - For Xiaohongshu, X/Twitter, Reddit, and Douyin, expect login, cookie, anti-automation, or region blockers. Use the user's existing authenticated session or configured cookies; stop if access is denied.
 - For Bilibili, do not use `yt-dlp` as the first path. Prefer `opencli bilibili video` and `opencli bilibili subtitle` when Browser Bridge is configured.
 - For generic pages, use Jina Reader first. If it returns a login wall or script shell, switch to browser/OpenCLI only when the content is accessible in the user's authorized browser session.
+- For account material collection, normalize extraction results with `scripts/material_intake.py` so later runs can search, score, and dedupe a local素材库.
 
 ## Failure Handling
 

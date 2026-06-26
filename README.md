@@ -25,7 +25,10 @@ extract-link-content-skill/
     ├── SKILL.md
     ├── agents/
     │   └── openai.yaml
+    ├── scripts/
+    │   └── material_intake.py
     └── references/
+        ├── material-workflow.md
         └── platform-routing.md
 ```
 
@@ -240,6 +243,63 @@ opencli browser douyin-test close
 
 抖音 Browser 兜底输出可能包含推荐流、侧栏和页面配置。处理结果时只保留目标视频块附近的标题、作者、描述、章节/摘要、互动数据和评论，不要把整页内容当成干净正文。
 
+## 素材入库、评分和去重
+
+当目标不是只读一个链接，而是给账号找素材时，可以把抓取结果标准化成素材卡片并写入本地素材库。
+
+默认素材库路径：
+
+```text
+~/Documents/link-content-materials/materials.jsonl
+```
+
+把一次抓取的 JSON 结果保存到 `/tmp/raw-extraction.json` 后运行：
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --print-card
+```
+
+可选账号定位配置：
+
+```text
+~/.codex/extract-link-content/profile.json
+```
+
+示例：
+
+```json
+{
+  "account_name": "my-content-account",
+  "keywords": ["AI", "agent", "automation", "creator tools"],
+  "avoid_keywords": ["movie", "music", "piracy"],
+  "target_platforms": ["xiaohongshu", "douyin", "youtube"],
+  "content_formats": ["short_video", "image_post", "thread"]
+}
+```
+
+带账号定位评分：
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --profile "$HOME/.codex/extract-link-content/profile.json" \
+  --print-card
+```
+
+查看高分素材：
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" list \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --limit 20
+```
+
+脚本会生成 `material-card-v1`，包含标题、作者、平台、正文、字幕、评论、媒体信息、互动数据、风险标记、复用角度、评分和去重状态。素材库、账号配置和抓取结果都应保存在本地，不要提交到公开仓库。
+
 ## 验证 Skill
 
 如果你的 Codex 环境包含系统 `skill-creator` 校验脚本，可以运行：
@@ -259,6 +319,5 @@ Skill is valid!
 
 - 不要提交 Cookie、token、浏览器 profile、媒体下载文件或临时抓取输出。
 - 平台命令发生变化时，优先更新 `extract-link-content/references/platform-routing.md`。
-- 后续如果要扩展成素材采集系统，建议新增独立 reference，例如素材评分、去重、本地素材库、跨平台搜索等。
+- 素材采集流程优先更新 `extract-link-content/references/material-workflow.md` 和 `extract-link-content/scripts/material_intake.py`。
 - 每次修改后重新运行 skill 校验。
-

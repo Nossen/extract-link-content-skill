@@ -24,7 +24,10 @@ extract-link-content-skill/
     ├── SKILL.md
     ├── agents/
     │   └── openai.yaml
+    ├── scripts/
+    │   └── material_intake.py
     └── references/
+        ├── material-workflow.md
         └── platform-routing.md
 ```
 
@@ -218,6 +221,63 @@ opencli browser douyin-test close
 
 For Douyin browser fallback, keep only the target video block around the video title, author, caption, chapter or summary text, stats, and comments. Do not treat the full recommendation feed as clean source content.
 
+## Material Intake, Scoring, And Deduplication
+
+When the goal is account material collection rather than reading a single link, normalize the extraction result into a material card and store it in a local JSONL library.
+
+Default library path:
+
+```text
+~/Documents/link-content-materials/materials.jsonl
+```
+
+After saving a raw extraction JSON result to `/tmp/raw-extraction.json`, run:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --print-card
+```
+
+Optional local account profile:
+
+```text
+~/.codex/extract-link-content/profile.json
+```
+
+Example:
+
+```json
+{
+  "account_name": "my-content-account",
+  "keywords": ["AI", "agent", "automation", "creator tools"],
+  "avoid_keywords": ["movie", "music", "piracy"],
+  "target_platforms": ["xiaohongshu", "douyin", "youtube"],
+  "content_formats": ["short_video", "image_post", "thread"]
+}
+```
+
+Ingest with profile-aware scoring:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --profile "$HOME/.codex/extract-link-content/profile.json" \
+  --print-card
+```
+
+List top cards:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" list \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --limit 20
+```
+
+The script writes `material-card-v1` records with title, author, platform, body text, transcript, comments, media, metrics, risk flags, reuse angles, scoring, and dedupe status. Keep the library, profile, and extraction output local; do not commit them.
+
 ## Validation
 
 Validate the skill folder if your Codex installation includes the system `skill-creator` validator:
@@ -237,5 +297,5 @@ Skill is valid!
 
 - Keep the repository free of cookies, tokens, profile data, downloaded media, and temporary extraction output.
 - Prefer updating `extract-link-content/references/platform-routing.md` when platform command behavior changes.
-- Prefer adding a separate reference file for future material-intake workflows such as scoring, deduplication, local material libraries, or cross-platform search.
+- Prefer updating `extract-link-content/references/material-workflow.md` and `extract-link-content/scripts/material_intake.py` for material-intake workflows.
 - Re-run the skill validator after every change.
