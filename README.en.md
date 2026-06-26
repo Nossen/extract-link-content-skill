@@ -268,6 +268,17 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ing
   --print-card
 ```
 
+Command output uses Chinese field labels by default for Chinese content workflows. Add `--lang en` for English field labels:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --profile "$HOME/.codex/extract-link-content/profile.json" \
+  --print-card \
+  --lang en
+```
+
 List top cards:
 
 ```bash
@@ -276,9 +287,9 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" lis
   --limit 20
 ```
 
-The `list` command prints an indented JSON array so it is readable in the terminal and easy to pass to later analysis steps.
+The `list` command prints an indented JSON array with Chinese field labels by default so it is readable in the terminal and easy to pass to later analysis steps. Use `--lang en` for English field labels.
 
-The script writes `material-card-v1` records with title, author, platform, body text, transcript, comments, media, metrics, risk flags, reuse angles, scoring, and dedupe status. Keep the library, profile, and extraction output local; do not commit them.
+The script writes `material-card-v1` records with title, author, platform, body text, transcript, comments, media, metrics, risk flags, reuse angles, scoring, and dedupe status. Terminal output defaults to Chinese field labels; the stored library keeps the stable English schema for compatibility, dedupe, and future upgrades. Keep the library, profile, and extraction output local; do not commit them.
 
 If the same link is already in the library but extraction or parser logic has improved, refresh the existing card:
 

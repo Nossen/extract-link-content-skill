@@ -290,6 +290,17 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ing
   --print-card
 ```
 
+命令行输出默认使用中文字段，适合中文内容选题和复盘。如果需要英文版字段，增加 `--lang en`：
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --profile "$HOME/.codex/extract-link-content/profile.json" \
+  --print-card \
+  --lang en
+```
+
 查看高分素材：
 
 ```bash
@@ -298,9 +309,9 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" lis
   --limit 20
 ```
 
-`list` 命令会输出缩进格式化的 JSON 数组，方便直接阅读或复制给后续分析步骤。
+`list` 命令会输出缩进格式化的中文字段 JSON 数组，方便直接阅读或复制给后续分析步骤。英文版同样使用 `--lang en`。
 
-脚本会生成 `material-card-v1`，包含标题、作者、平台、正文、字幕、评论、媒体信息、互动数据、风险标记、复用角度、评分和去重状态。素材库、账号配置和抓取结果都应保存在本地，不要提交到公开仓库。
+脚本会生成 `material-card-v1`，包含标题、作者、平台、正文、字幕、评论、媒体信息、互动数据、风险标记、复用角度、评分和去重状态。终端展示默认是中文字段；素材库内部仍保留稳定的英文 schema，方便程序兼容、去重和后续升级。素材库、账号配置和抓取结果都应保存在本地，不要提交到公开仓库。
 
 如果同一个链接已经入库，但你升级了抓取或解析逻辑，可以刷新已有记录：
 

@@ -56,6 +56,7 @@ For user-owned internal systems or approved staging environments, use explicit t
 3. Choose the platform command from [platform-routing.md](references/platform-routing.md).
 4. Store temporary downloads, captions, screenshots, and parsed output in `/tmp/`, not in the user's workspace.
 5. If the user's goal is素材收集、选题库、账号内容参考、批量找素材、入库、评分, or去重, read [material-workflow.md](references/material-workflow.md) and use `scripts/material_intake.py`.
+   - User-facing material JSON should use Chinese field labels by default. Use `--lang en` only when the user asks for English output or machine-oriented English fields.
 6. Return a compact extraction report with:
    - `source_url`
    - `platform`

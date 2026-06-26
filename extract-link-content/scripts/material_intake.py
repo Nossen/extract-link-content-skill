@@ -73,6 +73,84 @@ RISK_TERMS = [
 
 TOPIC_SPLIT_RE = re.compile(r"[\s,，、;；|/#]+")
 
+ZH_FIELD_LABELS = {
+    "written": "是否写入",
+    "action": "写入动作",
+    "library": "素材库路径",
+    "material_id": "素材ID",
+    "duplicate": "是否重复",
+    "duplicate_of": "重复来源ID",
+    "score": "评分",
+    "card": "素材卡",
+    "schema_version": "结构版本",
+    "source_url": "来源链接",
+    "canonical_url": "规范链接",
+    "platform": "平台",
+    "content_type": "内容类型",
+    "title": "标题",
+    "author": "作者",
+    "published_at": "发布时间",
+    "captured_at": "抓取时间",
+    "language": "语言",
+    "text": "文本内容",
+    "body": "正文",
+    "transcript": "字幕逐字稿",
+    "comments": "评论",
+    "media": "媒体",
+    "metrics": "互动数据",
+    "likes": "点赞数",
+    "shares": "分享数",
+    "views": "播放量",
+    "collects": "收藏数",
+    "tags": "标签",
+    "signals": "素材信号",
+    "hook": "标题钩子",
+    "topics": "主题",
+    "reuse_angles": "复用角度",
+    "pain_points": "痛点",
+    "risk_flags": "风险标记",
+    "scores": "评分明细",
+    "topic_value": "选题价值",
+    "hook_strength": "钩子强度",
+    "adaptability": "改编潜力",
+    "discussion_potential": "讨论潜力",
+    "account_fit": "账号匹配度",
+    "risk": "风险分",
+    "total": "总分",
+    "dedupe": "去重信息",
+    "content_hash": "内容哈希",
+    "is_duplicate": "是否重复",
+    "extraction": "抓取信息",
+    "tool_used": "使用工具",
+    "confidence": "置信度",
+    "blockers": "阻塞点",
+    "type": "类型",
+    "url": "链接",
+    "role": "用途",
+    "poster": "封面",
+}
+
+ZH_VALUE_LABELS = {
+    "appended": "已追加",
+    "replaced": "已刷新",
+    "duplicate": "重复未写入",
+    "video": "视频",
+    "image": "图片",
+    "article": "文章",
+    "text": "文本",
+    "external": "外链",
+    "thumbnail": "缩略图",
+    "preview_image_url": "预览图",
+    "poster": "封面",
+    "cover": "封面",
+    "external_media_link": "外部媒体链接",
+    "turn into a step-by-step tutorial": "改写成分步教程",
+    "turn into a mistake/avoidance post": "改写成避坑内容",
+    "turn into a comparison or ranking": "改写成对比或排行",
+    "turn into a case-study breakdown": "改写成案例拆解",
+    "turn into a topic explainer": "改写成主题解释",
+}
+
 
 def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
@@ -89,6 +167,25 @@ def clean_text(value: Any) -> str:
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+def localize_display(value: Any, lang: str) -> Any:
+    if lang == "en":
+        return value
+    if isinstance(value, dict):
+        localized: dict[str, Any] = {}
+        for key, item in value.items():
+            localized[ZH_FIELD_LABELS.get(str(key), str(key))] = localize_display(item, lang)
+        return localized
+    if isinstance(value, list):
+        return [localize_display(item, lang) for item in value]
+    if isinstance(value, str):
+        return ZH_VALUE_LABELS.get(value, value)
+    return value
+
+
+def print_display_json(value: Any, lang: str) -> None:
+    print(json.dumps(localize_display(value, lang), ensure_ascii=False, indent=2))
 
 
 def read_json(path: str | None) -> Any:
@@ -592,7 +689,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         "score": card["scores"]["total"],
         "card": card if args.print_card else None,
     }
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print_display_json(result, args.lang)
     return 0
 
 
@@ -611,7 +708,7 @@ def cmd_list(args: argparse.Namespace) -> int:
             "title": card.get("title"),
             "source_url": card.get("source_url"),
         })
-    print(json.dumps(summaries, ensure_ascii=False, indent=2))
+    print_display_json(summaries, args.lang)
     return 0
 
 
@@ -633,12 +730,14 @@ def build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--allow-duplicates", action="store_true", help="Append even if URL/hash already exists.")
     ingest.add_argument("--replace-existing", action="store_true", help="Replace an existing matching card instead of appending.")
     ingest.add_argument("--print-card", action="store_true", help="Print the full normalized card.")
+    ingest.add_argument("--lang", choices=["zh", "en"], default="zh", help="Display field language. Defaults to zh.")
     ingest.set_defaults(func=cmd_ingest)
 
     list_cmd = subparsers.add_parser("list", help="List top material cards from a library.")
     list_cmd.add_argument("--library", default=DEFAULT_LIBRARY, help="Material library JSONL path.")
     list_cmd.add_argument("--platform", default="", help="Filter by platform.")
     list_cmd.add_argument("--limit", type=int, default=20, help="Maximum cards to print.")
+    list_cmd.add_argument("--lang", choices=["zh", "en"], default="zh", help="Display field language. Defaults to zh.")
     list_cmd.set_defaults(func=cmd_list)
     return parser
 

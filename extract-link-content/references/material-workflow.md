@@ -60,14 +60,16 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ing
   --print-card
 ```
 
-4. Report the normalized card summary:
-   - material ID
-   - duplicate status
-   - total score and score breakdown
-   - hook
-   - reuse angles
-   - risk flags
-   - stored library path
+4. Report the normalized card summary with Chinese field labels by default:
+   - 素材ID
+   - 是否重复
+   - 总分和评分明细
+   - 标题钩子
+   - 复用角度
+   - 风险标记
+   - 素材库路径
+
+Use `--lang en` only when English field labels are needed. The stored JSONL library keeps the stable `material-card-v1` English schema for compatibility.
 
 ## Batch Workflow
 
