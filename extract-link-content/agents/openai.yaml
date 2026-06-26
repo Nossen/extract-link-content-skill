@@ -1,0 +1,4 @@
+interface:
+  display_name: "Extract Link Content"
+  short_description: "Extract content from social and video links"
+  default_prompt: "Use $extract-link-content to extract text, media metadata, captions, and visible discussion from this platform link."

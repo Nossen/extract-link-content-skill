@@ -1,0 +1,38 @@
+.DS_Store
+
+# Local env and secrets
+.env
+.env.*
+*.cookie
+*.cookies
+cookies*.txt
+*cookies*.json
+*.token
+*.pem
+*.key
+
+# Temporary extraction output
+tmp/
+logs/
+*.log
+*.tmp
+
+# Large media downloads should not be committed
+*.mp4
+*.mov
+*.m4v
+*.webm
+*.mkv
+*.avi
+*.mp3
+*.m4a
+*.wav
+*.flac
+
+# Local Python/Node artifacts
+__pycache__/
+*.pyc
+node_modules/
+.venv/
+venv/
+
