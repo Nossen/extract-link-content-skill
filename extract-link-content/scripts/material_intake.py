@@ -248,7 +248,14 @@ def normalize_from_raw(raw: Any, overrides: dict[str, str]) -> dict[str, Any]:
     )
     transcript = clean_text(source.get("transcript") or source.get("subtitle") or source.get("subtitles"))
     author = clean_text(source.get("author") or source.get("uploader") or source.get("channel"))
-    published_at = clean_text(source.get("published_at") or source.get("publish_time") or source.get("created_at"))
+    published_at = clean_text(
+        source.get("published_at")
+        or source.get("publish_time")
+        or source.get("publishdate")
+        or source.get("publish_date")
+        or source.get("upload_date")
+        or source.get("created_at")
+    )
     platform = infer_platform(source_url, clean_text(source.get("platform")))
     media = collect_media(source)
     content_text = "\n\n".join(part for part in [title, body, transcript] if part)
@@ -521,28 +528,35 @@ def existing_cards(library_path: Path) -> list[dict[str, Any]]:
     return cards
 
 
-def mark_duplicate(card: dict[str, Any], existing: list[dict[str, Any]]) -> dict[str, Any]:
+def duplicate_index(card: dict[str, Any], existing: list[dict[str, Any]]) -> int | None:
     source_url = card.get("source_url")
     content_hash = card.get("dedupe", {}).get("content_hash")
-    for old in existing:
+    for index, old in enumerate(existing):
         same_url = source_url and source_url == old.get("source_url")
         same_hash = content_hash and content_hash == old.get("dedupe", {}).get("content_hash")
         if same_url or same_hash:
-            card["dedupe"]["is_duplicate"] = True
-            card["dedupe"]["duplicate_of"] = old.get("material_id", "")
-            return card
-    return card
+            return index
+    return None
 
 
-def write_card(card: dict[str, Any], library_path: Path, allow_duplicates: bool) -> bool:
+def write_card(card: dict[str, Any], library_path: Path, allow_duplicates: bool, replace_existing: bool) -> str:
     library_path.parent.mkdir(parents=True, exist_ok=True)
     existing = existing_cards(library_path)
-    card = mark_duplicate(card, existing)
-    if card["dedupe"]["is_duplicate"] and not allow_duplicates:
-        return False
+    index = duplicate_index(card, existing)
+    if index is not None:
+        card["dedupe"]["is_duplicate"] = True
+        card["dedupe"]["duplicate_of"] = existing[index].get("material_id", "")
+        if replace_existing:
+            existing[index] = card
+            with library_path.open("w", encoding="utf-8") as handle:
+                for item in existing:
+                    handle.write(json.dumps(item, ensure_ascii=False, sort_keys=True) + "\n")
+            return "replaced"
+        if not allow_duplicates:
+            return "duplicate"
     with library_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(card, ensure_ascii=False, sort_keys=True) + "\n")
-    return True
+    return "appended"
 
 
 def cmd_ingest(args: argparse.Namespace) -> int:
@@ -567,9 +581,10 @@ def cmd_ingest(args: argparse.Namespace) -> int:
         profile,
     )
     library_path = Path(args.library).expanduser()
-    wrote = write_card(card, library_path, args.allow_duplicates)
+    action = write_card(card, library_path, args.allow_duplicates, args.replace_existing)
     result = {
-        "written": wrote,
+        "written": action in {"appended", "replaced"},
+        "action": action,
         "library": str(library_path),
         "material_id": card["material_id"],
         "duplicate": card["dedupe"]["is_duplicate"],
@@ -614,6 +629,7 @@ def build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--transcript", default="", help="Override transcript text.")
     ingest.add_argument("--content-type", default="", help="Override content type.")
     ingest.add_argument("--allow-duplicates", action="store_true", help="Append even if URL/hash already exists.")
+    ingest.add_argument("--replace-existing", action="store_true", help="Replace an existing matching card instead of appending.")
     ingest.add_argument("--print-card", action="store_true", help="Print the full normalized card.")
     ingest.set_defaults(func=cmd_ingest)
 

@@ -278,6 +278,17 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" lis
 
 The script writes `material-card-v1` records with title, author, platform, body text, transcript, comments, media, metrics, risk flags, reuse angles, scoring, and dedupe status. Keep the library, profile, and extraction output local; do not commit them.
 
+If the same link is already in the library but extraction or parser logic has improved, refresh the existing card:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" ingest \
+  --input "/tmp/raw-extraction.json" \
+  --library "$HOME/Documents/link-content-materials/materials.jsonl" \
+  --profile "$HOME/.codex/extract-link-content/profile.json" \
+  --replace-existing \
+  --print-card
+```
+
 ## Validation
 
 Validate the skill folder if your Codex installation includes the system `skill-creator` validator:

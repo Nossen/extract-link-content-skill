@@ -94,7 +94,7 @@ The script detects duplicates by:
 - exact `source_url`
 - normalized content hash
 
-If duplicate and `--allow-duplicates` is not set, it reports the existing material ID and does not append another record.
+If duplicate and `--allow-duplicates` is not set, it reports the existing material ID and does not append another record. Use `--replace-existing` when a parser or extraction upgrade should refresh the existing matching card instead of appending a duplicate.
 
 ## Comments
 
@@ -109,4 +109,3 @@ If ingestion fails:
 - wrong platform: pass `--platform`
 - duplicate: report the existing material ID
 - profile missing: continue without profile or create the profile locally
-
