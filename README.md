@@ -1,22 +1,26 @@
 # extract-link-content skill
 
-Codex skill for extracting readable content from platform links, with a focus on YouTube, Bilibili, Xiaohongshu, X/Twitter, Reddit, Douyin, and generic web URLs.
+用于 Codex 的链接内容抓取 skill，面向 YouTube、B站、小红书、X/Twitter、Reddit、抖音和通用网页链接。
 
-This repository contains the skill files plus the installation notes needed to reproduce the local setup. It is intended for authorized content collection using public pages, official platform surfaces, or login sessions that the user has explicitly authorized in their own browser.
+这个仓库包含 skill 文件和可复现的安装说明。它的目标是通过公开页面、官方平台页面、官方接口，或用户明确授权过的浏览器登录态，抓取可读内容、视频字幕、媒体信息和评论等素材。
 
-## What It Does
+[English README](README.en.md)
 
-- Classifies a user-provided link by platform.
-- Reuses the user's authorized Chrome login session through OpenCLI Browser Bridge.
-- Extracts source-grounded text, metadata, captions/subtitles, media URLs, image/video metadata, and comments when requested.
-- Reports exact blockers such as expired login, missing captions, captcha, rate limit, deleted content, private content, or unsupported media.
-- Avoids treating snippets, app shells, or recommendation-feed noise as full extracted content.
+## 功能
 
-## Repository Layout
+- 根据链接识别平台和内容类型。
+- 通过 OpenCLI Browser Bridge 复用用户已授权的 Chrome 登录态。
+- 抓取正文、标题、描述、作者、发布时间、互动数据、字幕、媒体 URL、图片/视频信息。
+- 按需抓取评论或回复。
+- 明确报告失败原因，例如登录过期、验证码、无字幕、429 限流、内容删除、私密内容、地区限制或工具缺失。
+- 避免把搜索片段、空壳页面、App shell、推荐流噪音当成完整正文。
+
+## 仓库结构
 
 ```text
 extract-link-content-skill/
 ├── README.md
+├── README.en.md
 └── extract-link-content/
     ├── SKILL.md
     ├── agents/
@@ -25,58 +29,58 @@ extract-link-content-skill/
         └── platform-routing.md
 ```
 
-## Safety Boundary
+## 安全边界
 
-Use this skill only with:
+只能用于以下场景：
 
-- Public content.
-- Official APIs or official platform web surfaces.
-- User-authorized cookies, sessions, or browser profiles.
-- Internal/staging systems where the user owns the target and has provided explicit test access.
+- 公开内容。
+- 官方 API 或官方平台网页。
+- 用户自己授权的 Cookie、登录态或浏览器 profile。
+- 用户拥有的内部测试环境，并且用户提供了明确的测试访问方式。
 
-Do not use this skill to bypass login, paywalls, private-content permissions, captchas, MFA, rate limits, account checks, or anti-automation controls. If a platform asks for verification or blocks access, stop and re-authorize normally.
+不要用这个 skill 绕过登录、付费墙、私密内容权限、验证码、MFA、限流、账号检查或平台反自动化机制。平台要求验证或拒绝访问时，应停止并按正常方式重新授权。
 
-Never commit cookies, tokens, browser profiles, downloaded private media, or session exports to this repository.
+不要把 Cookie、token、浏览器 profile、下载的私密媒体、登录态导出文件提交到本仓库。
 
-## Install The Skill
+## 安装 Skill
 
-Clone the repository:
+克隆仓库：
 
 ```bash
 git clone https://github.com/Nossen/extract-link-content-skill.git
 cd extract-link-content-skill
 ```
 
-Install the skill into Codex:
+安装到 Codex 的 skills 目录：
 
 ```bash
 mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
 rsync -a extract-link-content "${CODEX_HOME:-$HOME/.codex}/skills/"
 ```
 
-Restart Codex or open a new Codex session so the skill list refreshes.
+重启 Codex，或打开一个新的 Codex 会话，让 skill 列表刷新。
 
-## Install Runtime Dependencies
+## 安装运行依赖
 
-The minimal local tool set is:
+最小依赖是：
 
-- `opencli`: browser-session platform adapter.
-- `yt-dlp`: video metadata and subtitle fallback.
-- `curl`: generic public page fallback.
-- Chrome or Chromium: stores the user-authorized login sessions.
+- `opencli`：复用浏览器登录态的平台适配器。
+- `yt-dlp`：视频元数据和字幕兜底工具。
+- `curl`：通用公开网页兜底工具。
+- Chrome 或 Chromium：保存用户授权过的平台登录态。
 
-### 1. Install OpenCLI
+### 1. 安装 OpenCLI
 
 ```bash
 npm install -g @jackwener/opencli@latest
 opencli --version
 ```
 
-OpenCLI requires Node.js 20 or newer.
+OpenCLI 需要 Node.js 20 或更高版本。
 
-### 2. Install yt-dlp
+### 2. 安装 yt-dlp
 
-Use an isolated venv so the project does not depend on global Python packages:
+建议放到独立 venv，避免污染项目环境：
 
 ```bash
 mkdir -p "$HOME/.codex/tools" "$HOME/.local/bin"
@@ -85,21 +89,21 @@ python3 -m venv "$HOME/.codex/tools/link-tools-venv"
 ln -sf "$HOME/.codex/tools/link-tools-venv/bin/yt-dlp" "$HOME/.local/bin/yt-dlp"
 ```
 
-Make sure `~/.local/bin` is on PATH. For zsh:
+确认 `~/.local/bin` 在 PATH 里。zsh 可以这样设置：
 
 ```bash
 grep -q 'HOME/.local/bin' "$HOME/.zshenv" 2>/dev/null || echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshenv"
 ```
 
-Verify:
+验证：
 
 ```bash
 yt-dlp --version
 ```
 
-### 3. Install OpenCLI Browser Bridge
+### 3. 安装 OpenCLI Browser Bridge
 
-Download and unpack the OpenCLI Chrome extension. This example uses the version tested with this skill:
+下载并解压 OpenCLI Chrome 扩展。下面是本 skill 测试过的版本：
 
 ```bash
 mkdir -p "$HOME/Documents/opencli-extension-v1.0.20"
@@ -108,24 +112,24 @@ curl -L -o /tmp/opencli-extension-v1.0.20.zip \
 unzip -q /tmp/opencli-extension-v1.0.20.zip -d "$HOME/Documents/opencli-extension-v1.0.20"
 ```
 
-Load it in Chrome:
+在 Chrome 里加载扩展：
 
-1. Open `chrome://extensions/`.
-2. Enable `Developer Mode`.
-3. Click `Load unpacked`.
-4. Select this folder:
+1. 打开 `chrome://extensions/`。
+2. 打开右上角 `Developer Mode`。
+3. 点击 `Load unpacked`。
+4. 选择这个文件夹：
 
 ```text
 ~/Documents/opencli-extension-v1.0.20
 ```
 
-Verify the bridge:
+验证 Browser Bridge：
 
 ```bash
 opencli doctor
 ```
 
-Expected result:
+期望看到：
 
 ```text
 [OK] Daemon: running
@@ -133,26 +137,26 @@ Expected result:
 [OK] Connectivity: connected
 ```
 
-## One-Time Platform Login Setup
+## 一次性登录配置
 
-Use the same Chrome profile where the OpenCLI extension is installed.
+使用安装了 OpenCLI 扩展的同一个 Chrome profile。
 
-Log in normally to each platform you want to extract from:
+在这个 Chrome 里正常登录你要抓取的平台：
 
-- X/Twitter: `https://x.com`
-- Xiaohongshu: `https://www.xiaohongshu.com`
-- Douyin: `https://www.douyin.com`
-- Bilibili: `https://www.bilibili.com`
-- YouTube: `https://www.youtube.com`
-- Reddit: `https://www.reddit.com`
+- X/Twitter：`https://x.com`
+- 小红书：`https://www.xiaohongshu.com`
+- 抖音：`https://www.douyin.com`
+- B站：`https://www.bilibili.com`
+- YouTube：`https://www.youtube.com`
+- Reddit：`https://www.reddit.com`
 
-If you also need Xiaohongshu creator-center data, log in separately to:
+如果后续还需要读取小红书创作者后台数据，再单独登录：
 
 ```text
 https://creator.xiaohongshu.com
 ```
 
-After login, run read-only checks:
+登录完成后，运行只读检查：
 
 ```bash
 opencli auth status
@@ -164,31 +168,41 @@ opencli youtube whoami -f json
 opencli reddit whoami -f json
 ```
 
-Platform cookies are domain-bound. There is no single universal login state, but after each platform is logged in once in the same Chrome profile, OpenCLI can reuse those sessions automatically until the platform expires or challenges the session.
+各平台 Cookie 是按域名隔离的，不存在一个登录态通吃所有平台。正确做法是在同一个 Chrome profile 中分别登录一次各平台。之后 OpenCLI 会自动复用这些登录态，直到平台让你重新登录或重新验证。
 
-## Usage Examples
+## 使用示例
 
-Extract an X/Twitter article or thread:
+### X/Twitter
+
+抓取 X Article 或线程：
 
 ```bash
 opencli twitter article TWEET_ID -f md
 opencli twitter thread TWEET_ID -f json
 ```
 
-Extract a Xiaohongshu note:
+### 小红书
+
+抓取笔记正文和互动数据：
 
 ```bash
 opencli xiaohongshu note "FULL_NOTE_URL_WITH_XSEC_TOKEN" -f yaml
 ```
 
-Extract Bilibili metadata and subtitles:
+小红书笔记通常需要完整 URL 和 `xsec_token`。如果直接链接不可读，可以先用搜索或首页 feed 获取完整链接。
+
+### B站
+
+抓取视频元数据和字幕：
 
 ```bash
 opencli bilibili video BV_ID -f json
 opencli bilibili subtitle BV_ID -f json
 ```
 
-Extract YouTube metadata and subtitles:
+### YouTube
+
+抓取元数据和字幕：
 
 ```bash
 opencli youtube video "YOUTUBE_URL" -f json
@@ -198,42 +212,53 @@ yt-dlp --cookies-from-browser chrome --ignore-no-formats \
   --skip-download -o "/tmp/%(id)s.%(ext)s" "YOUTUBE_URL"
 ```
 
-Extract Reddit post details:
+YouTube 字幕有时需要 Chrome cookies。某些语言字幕请求可能触发 429，此时使用已成功下载的字幕，并报告被限流的语言。
+
+### Reddit
+
+抓取帖子正文、图片/视频预览、外链和评论：
 
 ```bash
 opencli reddit read "POST_URL_OR_ID" -f yaml
 ```
 
-Douyin URL fallback:
+### 抖音
+
+优先用搜索拿到视频链接和基础信息：
 
 ```bash
 opencli douyin search "QUERY_FROM_TITLE_OR_TOPIC" --limit 3 -f json
+```
+
+如果需要按视频 URL 抽取页面内容，可用 Browser Bridge 兜底：
+
+```bash
 opencli browser douyin-test tab new "DOUYIN_VIDEO_URL"
 opencli browser douyin-test get text body --tab "TAB_ID"
 opencli browser douyin-test close
 ```
 
-For Douyin browser fallback, keep only the target video block around the video title, author, caption, chapter or summary text, stats, and comments. Do not treat the full recommendation feed as clean source content.
+抖音 Browser 兜底输出可能包含推荐流、侧栏和页面配置。处理结果时只保留目标视频块附近的标题、作者、描述、章节/摘要、互动数据和评论，不要把整页内容当成干净正文。
 
-## Validation
+## 验证 Skill
 
-Validate the skill folder if your Codex installation includes the system `skill-creator` validator:
+如果你的 Codex 环境包含系统 `skill-creator` 校验脚本，可以运行：
 
 ```bash
 python "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" \
   "$HOME/.codex/skills/extract-link-content"
 ```
 
-Expected result:
+期望结果：
 
 ```text
 Skill is valid!
 ```
 
-## Maintenance Notes
+## 维护建议
 
-- Keep the repository free of cookies, tokens, profile data, downloaded media, and temporary extraction output.
-- Prefer updating `extract-link-content/references/platform-routing.md` when platform command behavior changes.
-- Prefer adding a separate reference file for future material-intake workflows such as scoring, deduplication, local material libraries, or cross-platform search.
-- Re-run the skill validator after every change.
+- 不要提交 Cookie、token、浏览器 profile、媒体下载文件或临时抓取输出。
+- 平台命令发生变化时，优先更新 `extract-link-content/references/platform-routing.md`。
+- 后续如果要扩展成素材采集系统，建议新增独立 reference，例如素材评分、去重、本地素材库、跨平台搜索等。
+- 每次修改后重新运行 skill 校验。
 
