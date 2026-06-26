@@ -227,14 +227,16 @@ opencli bilibili subtitle BV_ID -f json
 抓取元数据和字幕：
 
 ```bash
-opencli youtube video "YOUTUBE_URL" -f json
-opencli youtube transcript "YOUTUBE_URL" -f md
+yt-dlp --cookies-from-browser chrome --ignore-no-formats \
+  --dump-json "YOUTUBE_URL"
 yt-dlp --cookies-from-browser chrome --ignore-no-formats \
   --write-auto-sub --write-sub --sub-langs "zh.*,en.*" \
   --skip-download -o "/tmp/%(id)s.%(ext)s" "YOUTUBE_URL"
 ```
 
-YouTube 字幕有时需要 Chrome cookies。某些语言字幕请求可能触发 429，此时使用已成功下载的字幕，并报告被限流的语言。
+YouTube 默认不要用 `opencli youtube video` 或 `opencli youtube transcript`，因为它们可能通过 Browser Bridge 打开、激活或播放 Chrome 标签页。只有用户明确允许触碰浏览器时才使用 OpenCLI YouTube 兜底。
+
+YouTube 字幕有时需要 Chrome cookies。某些语言字幕请求可能触发 429，此时使用已成功下载的字幕，并报告被限流的语言。没有字幕时，可以用标题、简介、互动数据和缩略图做素材判断，但不能声称抓到了完整逐字稿。
 
 ### Reddit
 

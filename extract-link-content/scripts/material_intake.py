@@ -169,6 +169,19 @@ def clean_text(value: Any) -> str:
     return text.strip()
 
 
+def clean_body_text(value: Any) -> str:
+    if isinstance(value, (dict, list, tuple)):
+        return ""
+    return clean_text(value)
+
+
+def normalize_date_text(value: Any) -> str:
+    text = clean_text(value)
+    if re.fullmatch(r"\d{8}", text):
+        return f"{text[:4]}-{text[4:6]}-{text[6:8]}"
+    return text
+
+
 def localize_display(value: Any, lang: str) -> Any:
     if lang == "en":
         return value
@@ -343,9 +356,9 @@ def normalize_from_raw(raw: Any, overrides: dict[str, str]) -> dict[str, Any]:
         or source.get("description")
         or source.get("desc")
     )
-    transcript = clean_text(source.get("transcript") or source.get("subtitle") or source.get("subtitles"))
+    transcript = clean_body_text(source.get("transcript") or source.get("subtitle") or source.get("subtitles"))
     author = clean_text(source.get("author") or source.get("uploader") or source.get("channel"))
-    published_at = clean_text(
+    published_at = normalize_date_text(
         source.get("published_at")
         or source.get("publish_time")
         or source.get("publishdate")
@@ -452,7 +465,7 @@ def extract_metrics(source: dict[str, Any]) -> dict[str, int | None]:
         "likes": ["likes", "like_count", "digg_count"],
         "comments": ["comments", "comment_count"],
         "shares": ["shares", "share_count"],
-        "views": ["views", "view", "plays", "play_count"],
+        "views": ["views", "view", "view_count", "plays", "play_count"],
         "collects": ["collects", "favorites", "favorite_count"],
         "score": ["score", "upvotes"],
     }

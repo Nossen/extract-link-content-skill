@@ -75,7 +75,8 @@ For user-owned internal systems or approved staging environments, use explicit t
 
 - Use the smallest configured tool set first: `opencli` for supported browser-session platforms, `yt-dlp` for video metadata/captions, and `curl` with Jina Reader for generic public pages.
 - Do not open a browser tab or play media by default. Browser use is a fallback for login/session verification or page-only text after command-line/API routes fail.
-- For YouTube and other video platforms, prefer official captions, automatic captions, descriptions, and metadata before downloading media. Only transcribe audio when a local or configured transcription tool is available and the user explicitly needs full audio/video content.
+- For YouTube, do not run OpenCLI YouTube commands by default because they can drive Chrome through Browser Bridge. Prefer `yt-dlp --cookies-from-browser chrome --ignore-no-formats --dump-json` plus subtitle download commands, which do not open or play a page.
+- For other video platforms, prefer official captions, automatic captions, descriptions, and metadata before downloading media. Only transcribe audio when a local or configured transcription tool is available and the user explicitly needs full audio/video content.
 - For Xiaohongshu, X/Twitter, Reddit, and Douyin, expect login, cookie, anti-automation, or region blockers. Use the user's existing authenticated session or configured cookies; stop if access is denied.
 - For Bilibili, do not use `yt-dlp` as the first path. Prefer `opencli bilibili video` and `opencli bilibili subtitle` when Browser Bridge is configured.
 - For generic pages, use Jina Reader first. If it returns a login wall or script shell, switch to browser/OpenCLI only when the content is accessible in the user's authorized browser session.

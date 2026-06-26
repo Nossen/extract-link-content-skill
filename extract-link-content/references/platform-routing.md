@@ -68,15 +68,14 @@ Do not use these variables against third-party platforms unless they are the use
 Goal: title, description, metadata, captions/transcript.
 
 ```bash
-yt-dlp --dump-json "URL"
-yt-dlp --cookies-from-browser chrome --dump-json "URL"
+yt-dlp --cookies-from-browser chrome --ignore-no-formats --dump-json "URL"
 yt-dlp --write-auto-sub --write-sub --sub-langs "zh.*,en.*" --skip-download -o "/tmp/%(id)s.%(ext)s" "URL"
 yt-dlp --cookies-from-browser chrome --ignore-no-formats --write-auto-sub --write-sub --sub-langs "zh.*,en.*" --skip-download -o "/tmp/%(id)s.%(ext)s" "URL"
-opencli youtube transcript "URL" -f md
-opencli youtube video "URL" -f json
 ```
 
-Use captions when available. If OpenCLI transcript fails, retry subtitles with `yt-dlp --cookies-from-browser chrome`; some YouTube pages list and write subtitles only with the user's logged-in Chrome cookies. If subtitle download partially succeeds but a language hits 429, use the successfully written subtitle file and report the rate-limited language. If no captions are available, report that transcript extraction needs an audio transcription backend.
+Use `yt-dlp` first for YouTube because OpenCLI's YouTube adapter may use Browser Bridge and can open, activate, or autoplay a Chrome tab. Do not run `opencli youtube video` or `opencli youtube transcript` by default. Use those only after telling the user they may touch Chrome and receiving explicit approval.
+
+Use captions when available. If subtitle download partially succeeds but a language hits 429, use the successfully written subtitle file and report the rate-limited language. If no captions are available, report that transcript extraction needs an audio transcription backend. For素材判断, title, description, metadata, thumbnail, and engagement are acceptable if the report clearly says no full transcript was extracted.
 
 ## Bilibili / B站
 

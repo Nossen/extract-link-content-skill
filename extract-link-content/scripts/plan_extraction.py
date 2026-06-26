@@ -61,18 +61,12 @@ def youtube_plan(url: str, goal: str) -> dict[str, Any]:
         "fast_path": [
             {
                 "step": 1,
-                "tool": "opencli",
-                "purpose": "读取标题、简介、频道、发布时间、缩略图和互动数据",
-                "command": f"opencli youtube video {q(url)} -f json",
+                "tool": "yt-dlp",
+                "purpose": "不打开页面，使用已授权 Chrome cookie 读取标题、简介、频道、发布时间、缩略图和互动数据",
+                "command": f"yt-dlp --cookies-from-browser chrome --ignore-no-formats --dump-json {q(url)}",
             },
             {
                 "step": 2,
-                "tool": "opencli",
-                "purpose": "读取可用字幕或逐字稿",
-                "command": f"opencli youtube transcript {q(url)} -f md",
-            },
-            {
-                "step": 3,
                 "tool": "yt-dlp",
                 "purpose": "不打开页面，使用已授权 Chrome cookie 重试字幕下载",
                 "command": (
@@ -81,13 +75,19 @@ def youtube_plan(url: str, goal: str) -> dict[str, Any]:
                     f"--skip-download -o \"/tmp/%(id)s.%(ext)s\" {q(url)}"
                 ),
             },
+            {
+                "step": 3,
+                "tool": "material_intake.py",
+                "purpose": "如果没有字幕，仍可用元数据、简介、缩略图和互动数据做素材入库",
+                "command": "material_intake.py ingest --input /tmp/raw.json --platform youtube --print-card",
+            },
         ],
         "fallback_path": [
             {
-                "condition": "以上命令都无法读到字幕，但只做素材判断",
-                "tool": "material_intake.py",
-                "purpose": "只用标题、简介、互动数据和缩略图入库，不声明已取得完整视频正文",
-                "command": "material_intake.py ingest --input /tmp/raw.json --platform youtube --print-card",
+                "condition": "yt-dlp 无法读取元数据，且用户明确允许使用可能打开或激活 Chrome 标签页的 Browser Bridge",
+                "tool": "opencli",
+                "purpose": "读取浏览器会话中可见的视频元数据或字幕；这不是默认路径",
+                "command": f"opencli youtube video {q(url)} -f json && opencli youtube transcript {q(url)} -f md",
             },
             {
                 "condition": "用户明确要求完整视频内容且没有字幕",

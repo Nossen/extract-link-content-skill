@@ -216,12 +216,14 @@ opencli bilibili subtitle BV_ID -f json
 Extract YouTube metadata and subtitles:
 
 ```bash
-opencli youtube video "YOUTUBE_URL" -f json
-opencli youtube transcript "YOUTUBE_URL" -f md
+yt-dlp --cookies-from-browser chrome --ignore-no-formats \
+  --dump-json "YOUTUBE_URL"
 yt-dlp --cookies-from-browser chrome --ignore-no-formats \
   --write-auto-sub --write-sub --sub-langs "zh.*,en.*" \
   --skip-download -o "/tmp/%(id)s.%(ext)s" "YOUTUBE_URL"
 ```
+
+Do not use `opencli youtube video` or `opencli youtube transcript` by default because those commands may open, activate, or autoplay a Chrome tab through Browser Bridge. Use OpenCLI YouTube only after the user explicitly allows browser interaction.
 
 Extract Reddit post details:
 
