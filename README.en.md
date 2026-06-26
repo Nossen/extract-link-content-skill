@@ -276,6 +276,8 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" lis
   --limit 20
 ```
 
+The `list` command prints an indented JSON array so it is readable in the terminal and easy to pass to later analysis steps.
+
 The script writes `material-card-v1` records with title, author, platform, body text, transcript, comments, media, metrics, risk flags, reuse angles, scoring, and dedupe status. Keep the library, profile, and extraction output local; do not commit them.
 
 If the same link is already in the library but extraction or parser logic has improved, refresh the existing card:

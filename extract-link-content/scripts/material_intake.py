@@ -602,14 +602,16 @@ def cmd_list(args: argparse.Namespace) -> int:
     if args.platform:
         cards = [card for card in cards if card.get("platform") == args.platform]
     cards.sort(key=lambda card: card.get("scores", {}).get("total", 0), reverse=True)
+    summaries = []
     for card in cards[: args.limit]:
-        print(json.dumps({
+        summaries.append({
             "material_id": card.get("material_id"),
             "platform": card.get("platform"),
             "score": card.get("scores", {}).get("total"),
             "title": card.get("title"),
             "source_url": card.get("source_url"),
-        }, ensure_ascii=False))
+        })
+    print(json.dumps(summaries, ensure_ascii=False, indent=2))
     return 0
 
 

@@ -298,6 +298,8 @@ python "$HOME/.codex/skills/extract-link-content/scripts/material_intake.py" lis
   --limit 20
 ```
 
+`list` 命令会输出缩进格式化的 JSON 数组，方便直接阅读或复制给后续分析步骤。
+
 脚本会生成 `material-card-v1`，包含标题、作者、平台、正文、字幕、评论、媒体信息、互动数据、风险标记、复用角度、评分和去重状态。素材库、账号配置和抓取结果都应保存在本地，不要提交到公开仓库。
 
 如果同一个链接已经入库，但你升级了抓取或解析逻辑，可以刷新已有记录：
