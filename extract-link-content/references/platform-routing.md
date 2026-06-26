@@ -11,6 +11,19 @@ opencli doctor
 
 Use installed upstream tools directly. Keep the local tool set small: OpenCLI for browser-session platforms, yt-dlp for video metadata/captions, and curl for generic public pages.
 
+Before using a browser fallback, generate a route plan:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/plan_extraction.py" "URL"
+```
+
+Default policy:
+
+- Do not open a browser tab just to inspect a link when metadata, captions, transcript, or post text can be read through CLI/API routes.
+- Do not play video/audio by default.
+- Use Browser Bridge as a fallback only for login/session-backed page text, platform-specific URL resolution, or content that the CLI exposes only through the authorized browser session.
+- If a video has no captions,素材判断 can continue from title, description, visible metadata, thumbnail, and engagement. Full video content requires a configured transcription backend; browser playback is not the default path.
+
 OpenCLI requires Browser Bridge for session-backed site adapters. If `opencli doctor` reports `Extension: not connected`, ask the user to install or enable the extension and load the unpacked extension folder that was prepared locally:
 
 ```text

@@ -25,7 +25,8 @@ extract-link-content-skill/
     ├── agents/
     │   └── openai.yaml
     ├── scripts/
-    │   └── material_intake.py
+    │   ├── material_intake.py
+    │   └── plan_extraction.py
     └── references/
         ├── material-workflow.md
         └── platform-routing.md
@@ -174,6 +175,24 @@ Platform cookies are domain-bound. There is no single universal login state, but
 
 ## Usage Examples
 
+### Plan Before Fetching
+
+Opening a page or playing a video is not required by default. First generate a no-playback route plan:
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/plan_extraction.py" \
+  "https://www.youtube.com/watch?v=DNjV7ycRo80"
+```
+
+The output explains:
+
+- whether a page is opened by default
+- whether media is played by default
+- which commands should read metadata, body text, captions, or comments first
+- when Browser Bridge is a legitimate fallback
+
+Rule of thumb: use OpenCLI, yt-dlp, captions, metadata, or Jina Reader first. If a video has no captions, it can still be stored as a material candidate, but do not claim that a full transcript was extracted.
+
 Extract an X/Twitter article or thread:
 
 ```bash
@@ -321,5 +340,6 @@ Skill is valid!
 
 - Keep the repository free of cookies, tokens, profile data, downloaded media, and temporary extraction output.
 - Prefer updating `extract-link-content/references/platform-routing.md` when platform command behavior changes.
+- Prefer updating `extract-link-content/scripts/plan_extraction.py` and `extract-link-content/references/platform-routing.md` when page-opening or playback policy changes.
 - Prefer updating `extract-link-content/references/material-workflow.md` and `extract-link-content/scripts/material_intake.py` for material-intake workflows.
 - Re-run the skill validator after every change.

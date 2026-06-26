@@ -1,4 +1,4 @@
 interface:
   display_name: "Extract Link Content"
   short_description: "Extract, score, and save platform link material"
-  default_prompt: "Use $extract-link-content to extract this platform link, then score and dedupe it as local account material."
+  default_prompt: "Use $extract-link-content to plan a no-playback extraction route, extract this platform link, then score and dedupe it as local account material."

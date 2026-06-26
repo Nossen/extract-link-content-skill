@@ -52,12 +52,13 @@ For user-owned internal systems or approved staging environments, use explicit t
 ## Workflow
 
 1. Normalize the URL and classify the platform.
-2. Check installed upstream tools and any stored authorized session for that platform.
-3. Choose the platform command from [platform-routing.md](references/platform-routing.md).
-4. Store temporary downloads, captions, screenshots, and parsed output in `/tmp/`, not in the user's workspace.
-5. If the user's goal is素材收集、选题库、账号内容参考、批量找素材、入库、评分, or去重, read [material-workflow.md](references/material-workflow.md) and use `scripts/material_intake.py`.
+2. Plan the route before opening a browser: `python scripts/plan_extraction.py "URL"`.
+3. Check installed upstream tools and any stored authorized session for that platform.
+4. Choose the platform command from [platform-routing.md](references/platform-routing.md), starting with no-page fast paths.
+5. Store temporary downloads, captions, screenshots, and parsed output in `/tmp/`, not in the user's workspace.
+6. If the user's goal is素材收集、选题库、账号内容参考、批量找素材、入库、评分, or去重, read [material-workflow.md](references/material-workflow.md) and use `scripts/material_intake.py`.
    - User-facing material JSON should use Chinese field labels by default. Use `--lang en` only when the user asks for English output or machine-oriented English fields.
-6. Return a compact extraction report with:
+7. Return a compact extraction report with:
    - `source_url`
    - `platform`
    - `tool_used`
@@ -73,7 +74,8 @@ For user-owned internal systems or approved staging environments, use explicit t
 ## Routing Rules
 
 - Use the smallest configured tool set first: `opencli` for supported browser-session platforms, `yt-dlp` for video metadata/captions, and `curl` with Jina Reader for generic public pages.
-- For YouTube and other video platforms, prefer official captions or automatic captions before downloading media. Only transcribe audio when a local or configured transcription tool is available.
+- Do not open a browser tab or play media by default. Browser use is a fallback for login/session verification or page-only text after command-line/API routes fail.
+- For YouTube and other video platforms, prefer official captions, automatic captions, descriptions, and metadata before downloading media. Only transcribe audio when a local or configured transcription tool is available and the user explicitly needs full audio/video content.
 - For Xiaohongshu, X/Twitter, Reddit, and Douyin, expect login, cookie, anti-automation, or region blockers. Use the user's existing authenticated session or configured cookies; stop if access is denied.
 - For Bilibili, do not use `yt-dlp` as the first path. Prefer `opencli bilibili video` and `opencli bilibili subtitle` when Browser Bridge is configured.
 - For generic pages, use Jina Reader first. If it returns a login wall or script shell, switch to browser/OpenCLI only when the content is accessible in the user's authorized browser session.

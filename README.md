@@ -26,7 +26,8 @@ extract-link-content-skill/
     ├── agents/
     │   └── openai.yaml
     ├── scripts/
-    │   └── material_intake.py
+    │   ├── material_intake.py
+    │   └── plan_extraction.py
     └── references/
         ├── material-workflow.md
         └── platform-routing.md
@@ -174,6 +175,24 @@ opencli reddit whoami -f json
 各平台 Cookie 是按域名隔离的，不存在一个登录态通吃所有平台。正确做法是在同一个 Chrome profile 中分别登录一次各平台。之后 OpenCLI 会自动复用这些登录态，直到平台让你重新登录或重新验证。
 
 ## 使用示例
+
+### 先生成抓取计划
+
+默认不需要打开页面，也不需要播放视频。先让 skill 判断快路径：
+
+```bash
+python "$HOME/.codex/skills/extract-link-content/scripts/plan_extraction.py" \
+  "https://www.youtube.com/watch?v=DNjV7ycRo80"
+```
+
+输出会说明：
+
+- 是否默认打开页面
+- 是否默认播放媒体
+- 优先使用哪些命令读取元数据、正文、字幕或评论
+- 什么情况下才需要 Browser Bridge 兜底
+
+原则：能用 OpenCLI、yt-dlp、字幕、元数据、Jina Reader 读到的内容，不默认打开浏览器；没有字幕的视频可以先作为素材入库，但不能声称已经抓到完整逐字稿。
 
 ### X/Twitter
 
@@ -343,5 +362,6 @@ Skill is valid!
 
 - 不要提交 Cookie、token、浏览器 profile、媒体下载文件或临时抓取输出。
 - 平台命令发生变化时，优先更新 `extract-link-content/references/platform-routing.md`。
+- 是否需要打开页面或播放媒体的策略，优先更新 `extract-link-content/scripts/plan_extraction.py` 和 `extract-link-content/references/platform-routing.md`。
 - 素材采集流程优先更新 `extract-link-content/references/material-workflow.md` 和 `extract-link-content/scripts/material_intake.py`。
 - 每次修改后重新运行 skill 校验。
